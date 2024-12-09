@@ -81,19 +81,9 @@ func (r *restoreREST) Connect(ctx context.Context, uid string, opts runtime.Obje
 			return
 		}
 
-		rsp, err := r.unified.Read(ctx, &resource.ReadRequest{
+		finalRsp, err := r.unified.Restore(ctx, &resource.RestoreRequest{
+			ResourceVersion: rv,
 			Key:             key,
-			ResourceVersion: int64(rv),
-			IncludeDeleted:  true,
-		})
-		if err != nil || rsp == nil || rsp.Error != nil {
-			responder.Error(fmt.Errorf("could not find old resource: %s", res))
-			return
-		}
-
-		finalRsp, err := r.unified.Create(ctx, &resource.CreateRequest{
-			Value: rsp.Value,
-			Key:   key,
 		})
 		if err != nil || finalRsp == nil || finalRsp.Error != nil {
 			responder.Error(fmt.Errorf("could not re-create resource: %s", res))

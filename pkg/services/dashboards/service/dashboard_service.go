@@ -26,7 +26,6 @@ import (
 	"github.com/grafana/grafana/pkg/infra/metrics"
 	"github.com/grafana/grafana/pkg/services/accesscontrol"
 	"github.com/grafana/grafana/pkg/services/apiserver"
-	grafanaapiserver "github.com/grafana/grafana/pkg/services/apiserver"
 	"github.com/grafana/grafana/pkg/services/apiserver/endpoints/request"
 	"github.com/grafana/grafana/pkg/services/authz/zanzana"
 	"github.com/grafana/grafana/pkg/services/dashboards"
@@ -79,7 +78,7 @@ type DashboardServiceImpl struct {
 type dashboardK8sHandler struct {
 	namespacer         request.NamespaceMapper
 	gvr                schema.GroupVersionResource
-	restConfigProvider grafanaapiserver.RestConfigProvider
+	restConfigProvider apiserver.RestConfigProvider
 }
 
 // This is the uber service that implements a three smaller services
@@ -90,7 +89,6 @@ func ProvideDashboardServiceImpl(
 	folderSvc folder.Service, fStore folder.Store, r prometheus.Registerer, zclient zanzana.Client,
 	restConfigProvider apiserver.RestConfigProvider,
 ) (*DashboardServiceImpl, error) {
-
 	gvr := schema.GroupVersionResource{
 		Group:    v0alpha1.GROUP,
 		Version:  v0alpha1.VERSION,

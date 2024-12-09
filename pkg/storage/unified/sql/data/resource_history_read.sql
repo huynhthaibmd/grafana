@@ -16,12 +16,19 @@ SELECT
         AND {{ .Ident "name" }}      = {{ .Arg .Request.Key.Name }}
       {{ if .Request.IncludeDeleted }}
         AND {{ .Ident "action" }} != 3
+        -- check that deletion timestamp is not present. Otherwise, if a resource is deleted but has a finalizer
+        -- it will be returned in the history. We want to return the most recent version of the resource before deletion.
         AND {{ .Ident "value" }} NOT LIKE '%deletionTimestamp%'
-        {{ if gt .Request.ResourceVersion 0 }}
-          AND {{ .Ident "resource_version" }} = {{ .Arg .Request.ResourceVersion }}
-        {{ end }}
-      {{ else if gt .Request.ResourceVersion 0}}
-        AND {{ .Ident "resource_version" }} <= {{ .Arg .Request.ResourceVersion }}
+      {{ end }}
+      {{ if gt .Request.ResourceVersion 0 }}
+        AND {{ .Ident "resource_version" }}
+          -- if includeDeleted was set on the read request, and a resourceVersion is given, return the exact one requested
+          {{ if .Request.IncludeDeleted }}
+            =
+          {{ else }}
+            <=
+          {{ end }}
+          {{ .Arg .Request.ResourceVersion }}
       {{ end }}
     ORDER BY {{ .Ident "resource_version" }} DESC
     LIMIT 1
